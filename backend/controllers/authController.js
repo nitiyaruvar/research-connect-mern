@@ -2,6 +2,8 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const userRepository = require("../repositories/userRepository");
 const { createAccessToken } = require("../services/tokenService");
+const { removeUserRelationships } = require("../services/relationshipService");
+const { serializeCookie } = require("../utils/cookies");
 
 async function register(request, response) {
   const { name, username, email, password } = request.validatedBody;
@@ -26,4 +28,20 @@ async function currentUser(request, response) {
   response.json({ data: user });
 }
 
-module.exports = { currentUser, login, register };
+async function updateCurrentUser(request, response) {
+  const user = await User.findByIdAndUpdate(request.user.id, request.validatedBody, { new: true, runValidators: true });
+  if (!user) return response.status(404).json({ message: "Account not found" });
+  response.json({ data: user });
+}
+
+async function deleteCurrentUser(request, response) {
+  if (request.body?.confirm !== true) return response.status(400).json({ message: "Confirm account deletion to continue" });
+  const user = await User.findById(request.user.id);
+  if (!user) return response.status(404).json({ message: "Account not found" });
+  await removeUserRelationships(user.id);
+  await user.deleteOne();
+  response.append("Set-Cookie", serializeCookie("research_connect_token", "", { maxAge: 0 }));
+  response.status(204).end();
+}
+
+module.exports = { currentUser, deleteCurrentUser, login, register, updateCurrentUser };

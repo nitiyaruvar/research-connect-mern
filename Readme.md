@@ -8,18 +8,18 @@ This repository is being developed against the Module 2 product requirements. Wo
 
 | Requirement | Scope | Status |
 | --- | --- | --- |
-| 2.1 | Repository docs and contribution workflow | In progress |
-| 2.2 | React setup | Planned |
-| 2.3 | React components | Planned |
-| 2.4–2.10 | MongoDB models, operations, APIs, CRUD, relationships | Planned |
-| 2.11–2.13 | Password, JWT, and Google OAuth authentication | Planned |
-| 2.14 | File uploads | Planned |
-| 2.15 | Bruno API collection | Planned |
-| 2.16–2.17 | Backend and frontend deployment | Planned |
-| 2.18 | Jest API tests | Planned |
-| 2.19 | Docker deployment | Planned |
-| 2.20 | AI-assisted recommendations | Planned |
-| 2.21 | Submission and technical defense guide | Planned |
+| 2.1 | Repository docs and contribution workflow | Implemented |
+| 2.2 | React setup | Implemented |
+| 2.3 | React components | Implemented |
+| 2.4–2.10 | MongoDB models, operations, APIs, CRUD, relationships | Implemented |
+| 2.11–2.13 | Password, JWT, and Google OAuth authentication | Implemented |
+| 2.14 | File uploads | Implemented |
+| 2.15 | Bruno API collection | Implemented |
+| 2.16–2.17 | Backend and frontend deployment configuration | Implemented; deployment needs your service accounts and secrets |
+| 2.18 | Jest API tests | Implemented; not run in this environment |
+| 2.19 | Docker deployment | Implemented; not run in this environment |
+| 2.20 | AI-assisted recommendations | Implemented; optional OpenAI key required |
+| 2.21 | Submission and technical defense guide | Implemented |
 
 ## Stack
 
@@ -46,7 +46,7 @@ docs/          Architecture, API, deployment, and defense notes
 4. In `frontend/`, run `npm install`, then `npm run dev`.
 5. Open the local URL printed by Vite. The API health endpoint is `/api/health`.
 
-Docker Compose instructions and deployment environment variables are documented in `docs/deployment.md` as those requirements are implemented.
+Docker Compose instructions and deployment environment variables are documented in `docs/docker.md`, `docs/backend-deployment.md`, and `docs/frontend-deployment.md`.
 
 ## Contribution workflow
 
@@ -56,7 +56,11 @@ Docker Compose instructions and deployment environment variables are documented 
 - Do not commit `.env` files, secrets, generated uploads, or `node_modules`.
 - Update the requirement status and technical notes when a feature is completed.
 
-Use the **Bug report** and **Feature request** issue forms under GitHub Issues. Use the pull request template for implementation changes.
+Use the **Bug report** and **Feature request** issue forms under GitHub Issues. Use the pull request template for implementation changes. Requirement work is organized in 21 ordered branches and pull requests.
+
+## Submission and defense
+
+Read [the technical defense guide](docs/technical-defense.md) for the architecture, data model, security decisions, demo walkthrough, known setup requirements, and likely review questions. The app has been prepared for local use; cloud deployment, external OAuth, and live AI calls require credentials and service accounts that are not part of the source archive.
 
 ## Security notes
 
