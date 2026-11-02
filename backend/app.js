@@ -7,6 +7,7 @@ const collaborationRoutes = require("./routes/collaborationRoutes");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const recommendationRoutes = require("./routes/recommendationRoutes");
 const researcherRoutes = require("./routes/researcherRoutes");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
 
@@ -45,6 +46,7 @@ app.use("/api/collaborations", collaborationRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/uploads", uploadRoutes);
+app.use("/api/recommendations", recommendationRoutes);
 app.use(notFound);
 app.use(errorHandler);
 

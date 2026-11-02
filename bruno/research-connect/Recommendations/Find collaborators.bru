@@ -1,0 +1,20 @@
+meta {
+  name: Find collaborators
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/recommendations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  projectId: {{projectId}}
+  allowAI: false
+}
