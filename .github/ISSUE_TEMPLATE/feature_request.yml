@@ -1,0 +1,34 @@
+name: Feature request
+description: Propose a focused improvement to Research Connect.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: What are you trying to accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: requirement
+    attributes:
+      label: Module 2 requirement
+      options:
+        - 2.2 React initialization
+        - 2.3 React components
+        - 2.4–2.10 Database and APIs
+        - 2.11–2.13 Authentication
+        - 2.14 File uploads
+        - 2.15 Bruno
+        - 2.16–2.17 Deployment
+        - 2.18 Jest
+        - 2.19 Docker
+        - 2.20 AI integration
+        - 2.21 Submission and defense
