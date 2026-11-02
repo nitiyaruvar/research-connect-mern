@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getProjects, getResearchers } from "../api/client";
+import { apiRequest, getProjects, getResearchers } from "../api/client";
 import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 import ResearcherCard from "../components/ResearcherCard";
@@ -26,6 +26,11 @@ function Home() {
   const [liveResearchers, setLiveResearchers] = useState(null);
   const [liveProjects, setLiveProjects] = useState(null);
   const [apiUnavailable, setApiUnavailable] = useState(false);
+  const [recommendationProject, setRecommendationProject] = useState(null);
+  const [recommendationResults, setRecommendationResults] = useState([]);
+  const [recommendationStatus, setRecommendationStatus] = useState("");
+  const [recommendationNotice, setRecommendationNotice] = useState("");
+  const [allowAI, setAllowAI] = useState(false);
   const researchers = useMemo(() => {
     const search = query.trim().toLowerCase();
     return demoResearchers.filter((researcher) => {
@@ -86,6 +91,31 @@ function Home() {
     window.setTimeout(() => setNotice(""), 3800);
   }
 
+  function openRecommendations(project) {
+    setRecommendationProject(project);
+    setRecommendationResults([]);
+    setRecommendationStatus("");
+    setRecommendationNotice("");
+    setAllowAI(false);
+  }
+
+  async function findCollaborators(event) {
+    event.preventDefault();
+    setRecommendationStatus("Searching for a good fit…");
+    setRecommendationResults([]);
+    try {
+      const result = await apiRequest("/recommendations", {
+        method: "POST",
+        body: { projectId: recommendationProject.id, allowAI },
+      });
+      setRecommendationResults(result.data || []);
+      setRecommendationNotice(result.notice || (result.method === "openai" ? "AI assisted" : "Matched by overlapping research terms"));
+      setRecommendationStatus(result.data?.length ? "" : "No close matches yet. Add more research areas or invite collaborators from discovery.");
+    } catch (error) {
+      setRecommendationStatus(error.message);
+    }
+  }
+
   return (
     <div id="top" className="site-shell">
       <Navbar />
@@ -116,11 +146,28 @@ function Home() {
 
         <section id="projects" className="projects-section" aria-labelledby="projects-title">
           <div className="section-heading"><div><h2 id="projects-title">Research in motion</h2><p>Explore projects and see where your expertise could help.</p></div><a className="button button-quiet" href="#discover">Explore all projects <span aria-hidden="true">→</span></a></div>
-          <div className="researcher-grid">{displayedProjects.map((project) => <ProjectCard key={project.id} project={project} />)}</div>
+          <div className="researcher-grid">{displayedProjects.map((project) => <ProjectCard key={project.id} project={project} onRecommend={openRecommendations} />)}</div>
         </section>
       </main>
       <footer id="about" className="site-footer"><span>© 2025 Research Connect · Built for curious minds.</span><span>Discover · Share · Collaborate</span></footer>
       {notice && <div className="toast" role="status">{notice}<button onClick={() => setNotice("")} type="button" aria-label="Dismiss message">×</button></div>}
+      {recommendationProject && <div className="modal-backdrop" role="presentation">
+        <section className="recommendation-dialog" role="dialog" aria-modal="true" aria-labelledby="recommendation-title">
+          <button className="modal-close" onClick={() => setRecommendationProject(null)} type="button" aria-label="Close recommendations">×</button>
+          <span className="eyebrow"><span className="eyebrow-dot" /> Research fit</span>
+          <h2 id="recommendation-title">Find collaborators</h2>
+          <p className="dialog-project-title">{recommendationProject.title}</p>
+          <p className="dialog-copy">We can match by shared research terms locally. You can optionally ask OpenAI to rank the fit and suggest complementary expertise.</p>
+          <label className="consent-option"><input type="checkbox" checked={allowAI} onChange={(event) => setAllowAI(event.target.checked)} />
+            <span><strong>Use AI for this request</strong><small>If selected, this project’s title, summary, research areas, keywords, and candidate research fields are sent to OpenAI. Names, email addresses, and account IDs are excluded.</small></span>
+          </label>
+          <p className="ai-note">Suggestions are only a starting point. Review profiles and make collaboration decisions yourself.</p>
+          <div className="dialog-actions"><button className="button button-quiet" onClick={() => setRecommendationProject(null)} type="button">Cancel</button><button className="button button-primary" onClick={findCollaborators} type="button" disabled={recommendationStatus === "Searching for a good fit…"}>Find matches</button></div>
+          {recommendationNotice && <p className="recommendation-notice" role="status">{recommendationNotice}</p>}
+          {recommendationStatus && <p className="recommendation-status" role="status">{recommendationStatus}</p>}
+          {recommendationResults.length > 0 && <ul className="recommendation-list">{recommendationResults.map(({ researcher, score, reason }) => <li key={researcher._id}><div className="recommendation-result-head"><strong>{researcher.name}</strong><span>{score}% fit</span></div><small>{researcher.department || "Independent researcher"}</small><p>{reason}</p></li>)}</ul>}
+        </section>
+      </div>}
     </div>
   );
 }
