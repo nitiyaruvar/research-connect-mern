@@ -1,6 +1,8 @@
 const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
+const projectRoutes = require("./routes/projectRoutes");
+const researcherRoutes = require("./routes/researcherRoutes");
 
 const app = express();
 const configuredOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
@@ -20,6 +22,9 @@ app.get("/api/health", (_request, response) => {
     database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
   });
 });
+
+app.use("/api/researchers", researcherRoutes);
+app.use("/api/projects", projectRoutes);
 
 app.use((_request, response) => {
   response.status(404).json({ message: "Route not found" });
