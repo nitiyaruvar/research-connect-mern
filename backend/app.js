@@ -2,7 +2,9 @@ const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
 const projectRoutes = require("./routes/projectRoutes");
+const collaborationRoutes = require("./routes/collaborationRoutes");
 const researcherRoutes = require("./routes/researcherRoutes");
+const { errorHandler, notFound } = require("./middleware/errorHandler");
 
 const app = express();
 const configuredOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173")
@@ -25,9 +27,8 @@ app.get("/api/health", (_request, response) => {
 
 app.use("/api/researchers", researcherRoutes);
 app.use("/api/projects", projectRoutes);
-
-app.use((_request, response) => {
-  response.status(404).json({ message: "Route not found" });
-});
+app.use("/api/collaborations", collaborationRoutes);
+app.use(notFound);
+app.use(errorHandler);
 
 module.exports = app;
