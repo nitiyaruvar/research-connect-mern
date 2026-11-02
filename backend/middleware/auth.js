@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { getCookie } = require("../utils/cookies");
 
 function getJwtSecret() {
   const secret = process.env.JWT_SECRET;
@@ -9,8 +10,10 @@ function getJwtSecret() {
 }
 
 function requireAuth(request, response, next) {
-  const [scheme, token] = String(request.headers.authorization || "").split(" ");
-  if (scheme?.toLowerCase() !== "bearer" || !token) {
+  const [scheme, bearerToken] = String(request.headers.authorization || "").split(" ");
+  const cookieToken = getCookie(request.headers.cookie, "research_connect_token");
+  const token = scheme?.toLowerCase() === "bearer" ? bearerToken : cookieToken;
+  if (!token) {
     return response.status(401).json({ message: "Sign in to continue" });
   }
 
