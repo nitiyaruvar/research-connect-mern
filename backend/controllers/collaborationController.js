@@ -35,4 +35,37 @@ async function createCollaborationRequest(request, response) {
   response.status(201).json({ data: collaborationRequest });
 }
 
-module.exports = { createCollaborationRequest };
+async function updateCollaborationRequest(request, response) {
+  const { status } = request.body || {};
+  if (!request.isRequester && !["accepted", "declined"].includes(status)) {
+    return response.status(400).json({ message: "Recipients can accept or decline a pending request" });
+  }
+  if (request.isRequester && status !== "withdrawn" && request.user.role !== "admin") {
+    return response.status(400).json({ message: "Requesters can withdraw a pending request" });
+  }
+  if (request.user.role === "admin" && !["accepted", "declined", "withdrawn"].includes(status)) {
+    return response.status(400).json({ message: "Status is not supported" });
+  }
+  if (request.collaborationRequest.status !== "pending") {
+    return response.status(409).json({ message: "This request has already been answered" });
+  }
+  request.collaborationRequest.status = status;
+  request.collaborationRequest.respondedAt = new Date();
+  await request.collaborationRequest.save();
+  await request.collaborationRequest.populate([
+    { path: "requester", select: "name username department profilePicture" },
+    { path: "recipient", select: "name username department profilePicture" },
+    { path: "project", select: "title status" },
+  ]);
+  response.json({ data: request.collaborationRequest });
+}
+
+async function deleteCollaborationRequest(request, response) {
+  if (!request.isRequester && request.user.role !== "admin") {
+    return response.status(403).json({ message: "Only the requester can remove this request" });
+  }
+  await request.collaborationRequest.deleteOne();
+  response.status(204).end();
+}
+
+module.exports = { createCollaborationRequest, deleteCollaborationRequest, updateCollaborationRequest };

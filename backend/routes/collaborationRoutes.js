@@ -1,9 +1,12 @@
 const express = require("express");
-const { createCollaborationRequest } = require("../controllers/collaborationController");
+const { createCollaborationRequest, deleteCollaborationRequest, updateCollaborationRequest } = require("../controllers/collaborationController");
 const { requireAuth } = require("../middleware/auth");
+const { requireCollaborationParticipant } = require("../middleware/collaborationAccess");
 const { validateCollaborationInput } = require("../validators/collaborationValidator");
 
 const router = express.Router();
 router.post("/", requireAuth, validateCollaborationInput, createCollaborationRequest);
+router.patch("/:id", requireAuth, requireCollaborationParticipant, updateCollaborationRequest);
+router.delete("/:id", requireAuth, requireCollaborationParticipant, deleteCollaborationRequest);
 
 module.exports = router;
