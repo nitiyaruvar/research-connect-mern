@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getProjects, getResearchers } from "../api/client";
 import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 import ResearcherCard from "../components/ResearcherCard";
@@ -22,6 +23,9 @@ function Home() {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState(initialFilters);
   const [notice, setNotice] = useState("");
+  const [liveResearchers, setLiveResearchers] = useState(null);
+  const [liveProjects, setLiveProjects] = useState(null);
+  const [apiUnavailable, setApiUnavailable] = useState(false);
   const researchers = useMemo(() => {
     const search = query.trim().toLowerCase();
     return demoResearchers.filter((researcher) => {
@@ -32,6 +36,46 @@ function Home() {
         && (!filters.openToCollaboration || researcher.openToCollaboration);
     });
   }, [filters, query]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      try {
+        const [researcherResponse, projectResponse] = await Promise.all([
+          getResearchers({ search: query.trim(), ...filters }, controller.signal),
+          getProjects(controller.signal),
+        ]);
+        setLiveResearchers((researcherResponse.data || []).map((researcher) => ({
+          id: researcher._id,
+          name: researcher.name,
+          role: researcher.role,
+          department: researcher.department || "Independent researcher",
+          institution: researcher.institution || "Institution not listed",
+          interests: [...(researcher.researchInterests || []), ...(researcher.skills || [])].slice(0, 4),
+          openToCollaboration: researcher.isOpenToCollaboration,
+        })));
+        setLiveProjects((projectResponse.data || []).map((project) => ({
+          id: project._id,
+          title: project.title,
+          summary: project.summary,
+          status: project.status === "seeking-collaborators" ? "Seeking collaborators" : project.status,
+          year: project.startDate ? new Date(project.startDate).getFullYear() : "Ongoing",
+          lead: project.owner?.name || "Research team",
+          areas: project.researchAreas || [],
+        })));
+        setApiUnavailable(false);
+      } catch (error) {
+        if (error.name !== "AbortError") setApiUnavailable(true);
+      }
+    }, 250);
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [filters, query]);
+
+  const displayedResearchers = liveResearchers ?? researchers;
+  const displayedProjects = liveProjects ?? demoProjects;
 
   function updateFilter(key, value) {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -64,15 +108,15 @@ function Home() {
           <div className="directory-layout">
             <ResearcherFilters filters={filters} onChange={updateFilter} onReset={() => setFilters(initialFilters)} />
             <div>
-              {researchers.length ? <div className="researcher-grid">{researchers.map((researcher) => <ResearcherCard key={researcher.id} researcher={researcher} onConnect={showConnectNotice} />)}</div> : <div className="empty-state"><strong>No researchers found</strong>Try a different search or clear the filters.</div>}
-              <p className="demo-note">Sample profiles shown for product preview.</p>
+              {displayedResearchers.length ? <div className="researcher-grid">{displayedResearchers.map((researcher) => <ResearcherCard key={researcher.id} researcher={researcher} onConnect={showConnectNotice} />)}</div> : <div className="empty-state"><strong>No researchers found</strong>Try a different search or clear the filters.</div>}
+              {apiUnavailable && <p className="demo-note">API unavailable — showing sample profiles. Start the backend or check the VITE_API_URL setting.</p>}
             </div>
           </div>
         </section>
 
         <section id="projects" className="projects-section" aria-labelledby="projects-title">
           <div className="section-heading"><div><h2 id="projects-title">Research in motion</h2><p>Explore projects and see where your expertise could help.</p></div><a className="button button-quiet" href="#discover">Explore all projects <span aria-hidden="true">→</span></a></div>
-          <div className="researcher-grid">{demoProjects.map((project) => <ProjectCard key={project.id} project={project} />)}</div>
+          <div className="researcher-grid">{displayedProjects.map((project) => <ProjectCard key={project.id} project={project} />)}</div>
         </section>
       </main>
       <footer id="about" className="site-footer"><span>© 2025 Research Connect · Built for curious minds.</span><span>Discover · Share · Collaborate</span></footer>
