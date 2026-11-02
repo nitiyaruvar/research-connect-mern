@@ -1,0 +1,21 @@
+meta {
+  name: Create collaboration request
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/collaborations
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  recipientId: {{researcherId}}
+  projectId: {{projectId}}
+  message: I would like to discuss a possible collaboration.
+}

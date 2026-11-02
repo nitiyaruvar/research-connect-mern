@@ -1,0 +1,15 @@
+meta {
+  name: My collaboration requests
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/collaborations?status=pending
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

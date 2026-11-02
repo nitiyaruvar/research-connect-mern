@@ -1,0 +1,11 @@
+meta {
+  name: Search researchers
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/researchers?page=1&limit=12&search=climate
+  body: none
+  auth: none
+}

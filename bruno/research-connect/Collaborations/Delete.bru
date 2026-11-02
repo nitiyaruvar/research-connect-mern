@@ -1,0 +1,15 @@
+meta {
+  name: Remove request
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/collaborations/{{collaborationId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
