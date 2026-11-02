@@ -1,155 +1,63 @@
-# Research Networking Platform
+# Research Connect
 
-## Overview
+Research Connect is a MERN application for finding researchers, sharing projects, and starting collaborations across departments.
 
-Researchers working on related topics often remain unaware of potential collaboration opportunities within their own institutions. This leads to duplicated efforts, missed interdisciplinary partnerships, and slower innovation.
+## Project status
 
-The **Research Networking Platform** is designed to bridge this gap by connecting researchers, faculty members, scholars, and students based on their research interests, publications, expertise, and ongoing projects. The platform helps users discover potential collaborators, explore research activities across departments, and encourage interdisciplinary innovation.
+This repository is being developed against the Module 2 product requirements. Work is organized as one pull request per numbered requirement; the PRs are intended to be reviewed and merged in order because later work builds on earlier APIs and schemas.
 
----
+| Requirement | Scope | Status |
+| --- | --- | --- |
+| 2.1 | Repository docs and contribution workflow | In progress |
+| 2.2 | React setup | Planned |
+| 2.3 | React components | Planned |
+| 2.4–2.10 | MongoDB models, operations, APIs, CRUD, relationships | Planned |
+| 2.11–2.13 | Password, JWT, and Google OAuth authentication | Planned |
+| 2.14 | File uploads | Planned |
+| 2.15 | Bruno API collection | Planned |
+| 2.16–2.17 | Backend and frontend deployment | Planned |
+| 2.18 | Jest API tests | Planned |
+| 2.19 | Docker deployment | Planned |
+| 2.20 | AI-assisted recommendations | Planned |
+| 2.21 | Submission and technical defense guide | Planned |
 
-## Problem Statement
+## Stack
 
-In many universities and research institutions, researchers operate within departmental silos. As a result:
+- **Frontend:** React, Vite, JavaScript
+- **Backend:** Node.js, Express
+- **Database:** MongoDB with Mongoose
+- **Authentication:** username/email and password, JWT, optional Google OAuth
+- **API docs and operations:** Bruno, Docker Compose
 
-- Researchers are unaware of similar work happening in other departments.
-- Collaboration opportunities are often missed.
-- Interdisciplinary research projects are difficult to initiate.
-- Research resources and expertise remain underutilized.
-- Duplicate research efforts may occur due to lack of visibility.
+## Repository layout
 
-A centralized platform is needed to improve research discoverability and collaboration.
+```text
+backend/       Express API, models, middleware, services, and tests
+frontend/      React application and reusable UI components
+bruno/         Bruno collection and local environment example
+docs/          Architecture, API, deployment, and defense notes
+```
 
----
+## Getting started
 
-## Proposed Solution
+1. Install Node.js 20 or newer, npm, and Docker Desktop (or a local MongoDB server).
+2. Copy `backend/.env.example` to `backend/.env` and set a MongoDB URI and a long JWT secret.
+3. In `backend/`, run `npm install`, then `npm run dev`.
+4. In `frontend/`, run `npm install`, then `npm run dev`.
+5. Open the local URL printed by Vite. The API health endpoint is `/api/health`.
 
-The Research Networking Platform provides a centralized environment where researchers can:
+Docker Compose instructions and deployment environment variables are documented in `docs/deployment.md` as those requirements are implemented.
 
-- Create and manage professional research profiles.
-- Showcase research interests, publications, and projects.
-- Discover researchers with similar or complementary expertise.
-- Search research topics across departments.
-- Receive collaboration recommendations.
-- Connect and communicate with potential collaborators.
+## Contribution workflow
 
-By making institutional research more visible and accessible, the platform promotes innovation and knowledge sharing.
+- Pick an issue labeled with its requirement number and keep each PR focused on that requirement.
+- Branch from the immediately previous requirement PR when work depends on it. Merge PRs in numeric order.
+- Include a short summary, implementation notes, and verification steps in every PR.
+- Do not commit `.env` files, secrets, generated uploads, or `node_modules`.
+- Update the requirement status and technical notes when a feature is completed.
 
----
+Use the **Bug report** and **Feature request** issue forms under GitHub Issues. Use the pull request template for implementation changes.
 
-## Objectives
+## Security notes
 
-- Increase awareness of ongoing research within institutions.
-- Promote interdisciplinary collaboration.
-- Reduce duplication of research efforts.
-- Facilitate networking among researchers.
-- Provide intelligent recommendations for potential partnerships.
-- Improve accessibility to research information.
-
----
-
-## Key Features
-
-### Researcher Profiles
-- Personal and academic information.
-- Research interests and areas of expertise.
-- Publications and achievements.
-- Current and completed projects.
-
-### Smart Research Discovery
-- Search researchers by keywords, domain, department, or expertise.
-- Browse ongoing and completed research projects.
-
-### Collaboration Recommendations
-- Suggest potential collaborators based on:
-  - Research interests
-  - Keywords
-  - Publication topics
-  - Skills and expertise
-
-### Project Showcase
-- Display active and completed research projects.
-- Highlight project goals, outcomes, and contributors.
-
-### Communication System
-- Send collaboration requests.
-- Connect with researchers across departments.
-
-### Research Analytics Dashboard
-- Track collaboration trends.
-- View research activity and engagement metrics.
-
----
-
-## Target Users
-
-- Researchers
-- Faculty Members
-- PhD Scholars
-- Postgraduate Students
-- Research Administrators
-- Academic Institutions
-
----
-
-## Technology Stack
-
-### Frontend
-- React.js
-- HTML5
-- CSS3
-- JavaScript
-
-### Backend
-- Node.js
-- Express.js
-
-### Database
-- PostgreSQL / MongoDB
-
-### Authentication
-- JWT Authentication
-- Role-Based Access Control
-
-### Additional Tools
-- Git & GitHub
-- REST APIs
-
----
-
-## System Workflow
-
-1. User registers and creates a research profile.
-2. Research interests and expertise are added.
-3. Research data is stored in the database.
-4. Users search for researchers or projects.
-5. Recommendation engine identifies potential collaborators.
-6. Users connect and initiate collaborations.
-7. Research outcomes and projects are shared on the platform.
-
----
-
-## Expected Outcomes
-
-- Increased interdisciplinary research collaborations.
-- Better visibility of institutional research activities.
-- Improved knowledge sharing among researchers.
-- Enhanced innovation through cross-domain partnerships.
-- Stronger research ecosystem within institutions.
-
----
-
-## Future Enhancements
-
-- AI-powered collaboration recommendations.
-- Integration with Google Scholar and ORCID.
-- Publication citation analysis.
-- Research funding opportunity recommendations.
-- Real-time messaging and discussion forums.
-- Research event and conference tracking.
-
----
-
-## Conclusion
-
-The Research Networking Platform aims to create a collaborative research ecosystem by connecting researchers with shared interests and complementary expertise. By improving visibility, communication, and collaboration opportunities, the platform can help institutions unlock greater innovation and research impact.  
+Use environment variables for secrets. Passwords are hashed before storage, JWTs are required for protected routes, and each write must verify record ownership. Never put real credentials in Bruno examples or commit history.
