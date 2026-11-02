@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: research-connect-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 1d
+      - key: MAX_UPLOAD_BYTES
+        value: 5242880
