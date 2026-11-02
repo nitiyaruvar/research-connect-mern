@@ -45,4 +45,10 @@ async function getProject(request, response) {
   response.json({ data: project });
 }
 
-module.exports = { getProject, listProjects };
+async function createProject(request, response) {
+  const project = await Project.create({ ...request.validatedBody, owner: request.user.id });
+  await project.populate("owner", "name username department institution profilePicture");
+  response.status(201).json({ data: project });
+}
+
+module.exports = { createProject, getProject, listProjects };
