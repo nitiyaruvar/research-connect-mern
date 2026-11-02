@@ -1,0 +1,20 @@
+meta {
+  name: Update project
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/projects/{{projectId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  status: active
+  summary: Updated summary for the project.
+}

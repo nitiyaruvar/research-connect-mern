@@ -1,0 +1,11 @@
+meta {
+  name: List projects
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/projects?page=1&limit=12&status=seeking-collaborators
+  body: none
+  auth: none
+}

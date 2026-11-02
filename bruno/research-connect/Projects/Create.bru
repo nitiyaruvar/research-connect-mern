@@ -1,0 +1,25 @@
+meta {
+  name: Create project
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/projects
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  title: Cross-campus climate research
+  summary: A project description under 320 characters.
+  description: Share the research goals, methods, and collaboration needs.
+  department: Environmental Science
+  status: seeking-collaborators
+  researchAreas: [Climate science, Data science]
+  keywords: [urban heat, resilience]
+}

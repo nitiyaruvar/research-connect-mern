@@ -1,0 +1,19 @@
+meta {
+  name: Respond to request
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{baseUrl}}/collaborations/{{collaborationId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  status: accepted
+}
