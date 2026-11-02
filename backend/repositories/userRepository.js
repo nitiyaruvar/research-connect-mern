@@ -8,6 +8,10 @@ const userRepository = {
     const normalized = identity.trim().toLowerCase();
     return User.findOne({ $or: [{ email: normalized }, { username: normalized }] });
   },
+  findForLogin(identity) {
+    const normalized = identity.trim().toLowerCase();
+    return User.findOne({ $or: [{ email: normalized }, { username: normalized }] }).select("+password");
+  },
   create(attributes) {
     return User.create(attributes);
   },

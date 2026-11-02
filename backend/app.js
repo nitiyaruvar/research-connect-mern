@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const projectRoutes = require("./routes/projectRoutes");
 const collaborationRoutes = require("./routes/collaborationRoutes");
+const authRoutes = require("./routes/authRoutes");
 const researcherRoutes = require("./routes/researcherRoutes");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
 
@@ -28,6 +29,7 @@ app.get("/api/health", (_request, response) => {
 app.use("/api/researchers", researcherRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/collaborations", collaborationRoutes);
+app.use("/api/auth", authRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
