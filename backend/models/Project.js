@@ -21,5 +21,6 @@ const projectSchema = new mongoose.Schema(
 projectSchema.index({ title: "text", summary: "text", description: "text", researchAreas: "text", keywords: "text" });
 projectSchema.index({ status: 1, createdAt: -1 });
 projectSchema.index({ owner: 1, createdAt: -1 });
+projectSchema.index({ collaborators: 1 });
 
 module.exports = mongoose.model("Project", projectSchema);

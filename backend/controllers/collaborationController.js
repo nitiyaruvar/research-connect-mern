@@ -1,6 +1,26 @@
 const CollaborationRequest = require("../models/CollaborationRequest");
 const Project = require("../models/Project");
 const User = require("../models/User");
+const { paginationFrom } = require("../utils/query");
+
+async function listCollaborationRequests(request, response) {
+  const { page, limit, skip } = paginationFrom(request.query);
+  const filter = { $or: [{ requester: request.user.id }, { recipient: request.user.id }] };
+  const status = String(request.query.status || "");
+  if (["pending", "accepted", "declined", "withdrawn"].includes(status)) filter.status = status;
+  const [requests, total] = await Promise.all([
+    CollaborationRequest.find(filter)
+      .populate("requester", "name username department profilePicture")
+      .populate("recipient", "name username department profilePicture")
+      .populate("project", "title summary status")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    CollaborationRequest.countDocuments(filter),
+  ]);
+  response.json({ data: requests, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
+}
 
 async function createCollaborationRequest(request, response) {
   const { recipientId, projectId, message } = request.validatedBody;
@@ -52,6 +72,11 @@ async function updateCollaborationRequest(request, response) {
   request.collaborationRequest.status = status;
   request.collaborationRequest.respondedAt = new Date();
   await request.collaborationRequest.save();
+  if (status === "accepted" && request.collaborationRequest.project) {
+    await Project.findByIdAndUpdate(request.collaborationRequest.project, {
+      $addToSet: { collaborators: request.collaborationRequest.requester },
+    });
+  }
   await request.collaborationRequest.populate([
     { path: "requester", select: "name username department profilePicture" },
     { path: "recipient", select: "name username department profilePicture" },
@@ -68,4 +93,4 @@ async function deleteCollaborationRequest(request, response) {
   response.status(204).end();
 }
 
-module.exports = { createCollaborationRequest, deleteCollaborationRequest, updateCollaborationRequest };
+module.exports = { createCollaborationRequest, deleteCollaborationRequest, listCollaborationRequests, updateCollaborationRequest };
