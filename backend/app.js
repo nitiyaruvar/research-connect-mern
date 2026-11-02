@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const projectRoutes = require("./routes/projectRoutes");
 const collaborationRoutes = require("./routes/collaborationRoutes");
 const authRoutes = require("./routes/authRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const researcherRoutes = require("./routes/researcherRoutes");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
 
@@ -30,6 +31,7 @@ app.use("/api/researchers", researcherRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/collaborations", collaborationRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
