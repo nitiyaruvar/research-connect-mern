@@ -1,4 +1,5 @@
 const Project = require("../models/Project");
+const CollaborationRequest = require("../models/CollaborationRequest");
 const { escapeRegex, isValidId, paginationFrom } = require("../utils/query");
 
 async function listProjects(request, response) {
@@ -64,4 +65,10 @@ async function updateProject(request, response) {
   response.json({ data: project });
 }
 
-module.exports = { createProject, getProject, listProjects, updateProject };
+async function deleteProject(request, response) {
+  await CollaborationRequest.updateMany({ project: request.project.id }, { $set: { project: null } });
+  await request.project.deleteOne();
+  response.status(204).end();
+}
+
+module.exports = { createProject, deleteProject, getProject, listProjects, updateProject };
