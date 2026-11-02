@@ -26,4 +26,12 @@ function requireAuth(request, response, next) {
   }
 }
 
-module.exports = { getJwtSecret, requireAuth };
+function requireRole(...roles) {
+  return (request, response, next) => {
+    if (!request.user) return response.status(401).json({ message: "Sign in to continue" });
+    if (!roles.includes(request.user.role)) return response.status(403).json({ message: "You do not have permission to access this resource" });
+    return next();
+  };
+}
+
+module.exports = { getJwtSecret, requireAuth, requireRole };
