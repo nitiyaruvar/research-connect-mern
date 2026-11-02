@@ -51,4 +51,17 @@ async function createProject(request, response) {
   response.status(201).json({ data: project });
 }
 
-module.exports = { createProject, getProject, listProjects };
+async function updateProject(request, response) {
+  const nextStart = Object.hasOwn(request.validatedBody, "startDate") ? request.validatedBody.startDate : request.project.startDate;
+  const nextEnd = Object.hasOwn(request.validatedBody, "endDate") ? request.validatedBody.endDate : request.project.endDate;
+  if (nextStart && nextEnd && nextEnd < nextStart) {
+    return response.status(400).json({ message: "End date cannot be before start date" });
+  }
+  const project = await Project.findByIdAndUpdate(request.project.id, request.validatedBody, {
+    new: true,
+    runValidators: true,
+  }).populate("owner", "name username department institution profilePicture");
+  response.json({ data: project });
+}
+
+module.exports = { createProject, getProject, listProjects, updateProject };

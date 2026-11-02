@@ -50,4 +50,36 @@ function validateProjectInput(request, response, next) {
   }
 }
 
-module.exports = { validateProjectInput };
+function validateProjectUpdate(request, response, next) {
+  try {
+    const body = request.body || {};
+    const input = {};
+    for (const [field, max] of [["title", 160], ["summary", 320], ["description", 8000], ["department", 120]]) {
+      if (Object.hasOwn(body, field)) input[field] = cleanString(body[field], field, { required: true, max });
+    }
+    for (const [field, label] of [["researchAreas", "Research areas"], ["keywords", "Keywords"]]) {
+      if (Object.hasOwn(body, field)) input[field] = cleanStringList(body[field], label);
+    }
+    if (Object.hasOwn(body, "status")) {
+      if (!ALLOWED_STATUSES.has(body.status)) throw new Error("Status is not supported");
+      input.status = body.status;
+    }
+    for (const field of ["startDate", "endDate"]) {
+      if (!Object.hasOwn(body, field)) continue;
+      if (body[field] === null || body[field] === "") {
+        input[field] = null;
+        continue;
+      }
+      const date = new Date(body[field]);
+      if (Number.isNaN(date.valueOf())) throw new Error(`${field} is invalid`);
+      input[field] = date;
+    }
+    if (Object.keys(input).length === 0) throw new Error("Provide at least one field to update");
+    request.validatedBody = input;
+    next();
+  } catch (error) {
+    response.status(400).json({ message: error.message });
+  }
+}
+
+module.exports = { validateProjectInput, validateProjectUpdate };
