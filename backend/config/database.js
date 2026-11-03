@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const os = require("node:os");
 
 async function connectDatabase(uri = process.env.MONGODB_URI) {
   if (!uri) {
@@ -8,6 +9,7 @@ async function connectDatabase(uri = process.env.MONGODB_URI) {
   mongoose.set("strictQuery", true);
   await mongoose.connect(uri, {
     serverSelectionTimeoutMS: Number(process.env.MONGODB_TIMEOUT_MS) || 10000,
+    runtimeAdapters: { os },
   });
   return mongoose.connection;
 }

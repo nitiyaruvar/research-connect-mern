@@ -3,6 +3,7 @@ const os = require("node:os");
 const path = require("node:path");
 const mongoose = require("mongoose");
 const request = require("supertest");
+const connectDatabase = require("../config/database");
 
 const uploadDirectory = path.join(os.tmpdir(), `research-connect-test-${process.pid}`);
 process.env.UPLOAD_DIR = uploadDirectory;
@@ -41,7 +42,8 @@ integration("MongoDB-backed user workflows", () => {
   let secondCookie;
 
   beforeAll(async () => {
-    await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 5000 });
+    process.env.MONGODB_TIMEOUT_MS = "5000";
+    await connectDatabase(mongoUri);
     await mongoose.connection.dropDatabase();
     await Promise.all([User.init(), Project.init()]);
   }, 15000);

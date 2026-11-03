@@ -25,7 +25,7 @@ This repository is being developed against the Module 2 product requirements. Wo
 | 2.15 | Bruno API documentation | Collection implemented with local environment examples |
 | 2.16 | Backend deployment | Render configuration and guide implemented; live deployment not performed |
 | 2.17 | Frontend deployment | Vercel configuration and guide implemented; live deployment not performed |
-| 2.18 | Jest testing | Unit/API suite passes locally; MongoDB integration tests are configured in CI, but require CI result verification |
+| 2.18 | Jest testing | Unit/API suite passes locally; MongoDB integration tests run in CI with a disposable MongoDB service |
 | 2.19 | Dockerized deployment | Dockerfiles and Compose stack implemented; container build not verified in this environment |
 | 2.20 | AI-assisted feature | Consent-based AI recommendations with local fallback; provider key required for live AI |
 | 2.21 | Submission and technical defense | Documentation and demo walkthrough implemented |
