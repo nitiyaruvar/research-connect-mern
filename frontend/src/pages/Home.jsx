@@ -40,7 +40,14 @@ function Home() {
   const [connectResearcher, setConnectResearcher] = useState(null);
 
   useEffect(() => {
-    if (!window.localStorage.getItem("research-connect-token")) return;
+    const url = new URL(window.location.href);
+    const oauthResult = url.searchParams.get("oauth");
+    if (oauthResult) { url.searchParams.delete("oauth"); window.history.replaceState({}, "", url); }
+    const hasToken = Boolean(window.localStorage.getItem("research-connect-token"));
+    if (!hasToken && oauthResult !== "success") {
+      if (oauthResult === "failed" || oauthResult === "cancelled") setNotice(oauthResult === "failed" ? "Google sign-in could not be completed." : "Google sign-in was cancelled.");
+      return;
+    }
     let active = true;
     apiRequest("/auth/me").then((result) => { if (active) setUser(result.data); }).catch(() => {
       window.localStorage.removeItem("research-connect-token");
@@ -186,7 +193,7 @@ function Home() {
         </section>
       </div>}
       {authMode && <AuthDialog mode={authMode} onClose={() => setAuthMode("")} onAuthenticated={(nextUser) => { setUser(nextUser); setNotice(`Welcome, ${nextUser.name}. Your workspace is ready.`); }} />}
-      {workspace && user && <WorkspaceDialog user={user} initialTab={workspace} onClose={() => setWorkspace("")} onUserUpdated={setUser} onNotice={setNotice} onProjectCreated={(project) => { setLiveProjects((current) => [{ id: project._id, title: project.title, summary: project.summary, status: project.status === "seeking-collaborators" ? "Seeking collaborators" : project.status, year: project.startDate ? new Date(project.startDate).getFullYear() : "Ongoing", lead: user.name, areas: project.researchAreas || [] }, ...(current || [])]); }} />}
+      {workspace && user && <WorkspaceDialog user={user} initialTab={workspace} onClose={() => setWorkspace("")} onUserUpdated={setUser} onNotice={setNotice} onProjectCreated={(project) => { setLiveProjects((current) => { const normalized = { id: project._id, title: project.title, summary: project.summary, status: project.status === "seeking-collaborators" ? "Seeking collaborators" : project.status, year: project.startDate ? new Date(project.startDate).getFullYear() : "Ongoing", lead: user.name, areas: project.researchAreas || [] }; return [normalized, ...(current || []).filter((item) => item.id !== project._id)]; }); }} onProjectDeleted={(projectId) => setLiveProjects((current) => (current || []).filter((item) => item.id !== projectId))} />}
       {connectResearcher && <ConnectDialog researcher={connectResearcher} projects={liveProjects || []} onClose={() => setConnectResearcher(null)} onNotice={setNotice} />}
     </div>
   );

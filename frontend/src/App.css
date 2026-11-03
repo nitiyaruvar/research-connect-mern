@@ -98,6 +98,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .form-error { margin: 0; color: #a03d35; font-size: 12px; }
 .form-feedback { margin: 14px 0 0; color: var(--forest); font-size: 12px; font-weight: 700; }
 .auth-switch { margin: 18px 0 0; text-align: center; color: var(--muted); font-size: 12px; }
+.auth-divider { display: flex; align-items: center; gap: 10px; margin: 14px 0; color: #829087; font-size: 11px; }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.google-button { width: 100%; min-height: 42px; }
 .auth-switch button, .workspace-bottom button { border: 0; padding: 3px; color: var(--forest); background: transparent; font: inherit; font-weight: 700; }
 .workspace-dialog { width: min(690px, 100%); }
 .workspace-tabs { display: flex; gap: 6px; margin: 18px 0 5px; border-bottom: 1px solid var(--line); }
@@ -117,6 +120,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .request-status.pending { background: #fff3d8; color: #785719; }
 .request-status.accepted { background: #e8f5e9; color: #28613f; }
 .request-actions { justify-content: end; margin-top: 12px; }
+.owned-projects { display: grid; gap: 8px; margin: 14px 0 20px; }
+.owned-projects h3, .workspace-form h3 { margin: 0; font: 700 14px Manrope, sans-serif; }
+.owned-project { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 9px; padding: 11px 12px; }
+.owned-project > div:first-child { display: grid; gap: 4px; min-width: 0; }
+.owned-project strong { overflow: hidden; color: var(--ink); font-size: 12px; text-overflow: ellipsis; }
+.owned-project small { color: var(--muted); font-size: 10px; text-transform: capitalize; }
+.owned-actions { display: flex; gap: 6px; }
+.owned-actions .button { padding: 7px 10px; font-size: 11px; }
+.delete-action { color: #994f48; }
 .workspace-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
 @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .workspace-tabs { margin-right: 22px; } .workspace-tabs button { padding-inline: 7px; font-size: 11px; } }
 @media (max-width: 850px) { .nav-links { display: none; } .directory-layout { grid-template-columns: 1fr; } .filter-panel { display: grid; grid-template-columns: repeat(2, 1fr); column-gap: 14px; } .filter-title { grid-column: 1 / -1; } .filter-check { align-self: end; } }

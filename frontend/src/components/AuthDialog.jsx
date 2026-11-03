@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiRequest } from "../api/client";
+import { apiUrl } from "../api/config";
 
 function AuthDialog({ mode: initialMode = "login", onClose, onAuthenticated }) {
   const [mode, setMode] = useState(initialMode);
@@ -36,6 +37,8 @@ function AuthDialog({ mode: initialMode = "login", onClose, onAuthenticated }) {
         {error && <p className="form-error" role="alert">{error}</p>}
         <button className="button button-primary form-submit" disabled={busy}>{busy ? "Please wait…" : mode === "register" ? "Create account" : "Sign in"}</button>
       </form>
+      <div className="auth-divider"><span>or</span></div>
+      <button className="button button-outline google-button" type="button" onClick={() => window.location.assign(apiUrl("/auth/google"))}>Continue with Google</button>
       <p className="auth-switch">{mode === "register" ? "Already have an account?" : "New to Research Connect?"} <button type="button" onClick={() => { setMode(mode === "register" ? "login" : "register"); setError(""); }}>{mode === "register" ? "Sign in" : "Create an account"}</button></p>
     </section>
   </div>;
