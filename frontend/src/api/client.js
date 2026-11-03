@@ -21,6 +21,17 @@ export async function apiRequest(path, { method = "GET", body, signal } = {}) {
   return response.json();
 }
 
+export async function uploadFile(file) {
+  if (file.size > 5 * 1024 * 1024) throw new Error("Choose an image smaller than 5 MB.");
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("The selected image could not be read."));
+    reader.readAsDataURL(file);
+  });
+  return apiRequest("/uploads", { method: "POST", body: { originalName: file.name, dataUrl } });
+}
+
 export function getResearchers(filters, signal) {
   const query = new URLSearchParams({ page: "1", limit: "24" });
   if (filters.search) query.set("search", filters.search);

@@ -4,6 +4,9 @@ import Navbar from "../components/Navbar";
 import ProjectCard from "../components/ProjectCard";
 import ResearcherCard from "../components/ResearcherCard";
 import ResearcherFilters from "../components/ResearcherFilters";
+import AuthDialog from "../components/AuthDialog";
+import WorkspaceDialog from "../components/WorkspaceDialog";
+import ConnectDialog from "../components/ConnectDialog";
 
 const demoResearchers = [
   { id: "r1", name: "Aisha Rao", role: "Associate Professor", department: "Computer Science", institution: "Northbridge University", interests: ["Artificial intelligence", "Climate science"], openToCollaboration: true },
@@ -31,6 +34,20 @@ function Home() {
   const [recommendationStatus, setRecommendationStatus] = useState("");
   const [recommendationNotice, setRecommendationNotice] = useState("");
   const [allowAI, setAllowAI] = useState(false);
+  const [user, setUser] = useState(null);
+  const [authMode, setAuthMode] = useState("");
+  const [workspace, setWorkspace] = useState("");
+  const [connectResearcher, setConnectResearcher] = useState(null);
+
+  useEffect(() => {
+    if (!window.localStorage.getItem("research-connect-token")) return;
+    let active = true;
+    apiRequest("/auth/me").then((result) => { if (active) setUser(result.data); }).catch(() => {
+      window.localStorage.removeItem("research-connect-token");
+      if (active) setNotice("Your session expired. Sign in again to continue.");
+    });
+    return () => { active = false; };
+  }, []);
   const researchers = useMemo(() => {
     const search = query.trim().toLowerCase();
     return demoResearchers.filter((researcher) => {
@@ -87,8 +104,8 @@ function Home() {
   }
 
   function showConnectNotice(researcher) {
-    setNotice(`Sign in to send a collaboration request to ${researcher.name}.`);
-    window.setTimeout(() => setNotice(""), 3800);
+    if (!user) { setAuthMode("login"); setNotice("Sign in to send a collaboration request."); return; }
+    setConnectResearcher(researcher);
   }
 
   function openRecommendations(project) {
@@ -118,7 +135,7 @@ function Home() {
 
   return (
     <div id="top" className="site-shell">
-      <Navbar />
+      <Navbar user={user} onLogin={() => setAuthMode("login")} onJoin={() => setAuthMode("register")} onWorkspace={() => setWorkspace("profile")} />
       <main>
         <section className="hero" aria-labelledby="hero-title">
           <span className="eyebrow"><span className="eyebrow-dot" /> A brighter way to do research</span>
@@ -133,7 +150,7 @@ function Home() {
         <section id="discover" className="page-content" aria-labelledby="discover-title">
           <div className="section-heading">
             <div><h2 id="discover-title">Meet your next collaborator</h2><p>Discover the people behind ideas across your institution.</p></div>
-            <button className="button button-outline" type="button" onClick={() => setNotice("Create a profile to appear in researcher discovery.")}>Create your profile <span aria-hidden="true">↗</span></button>
+            <button className="button button-outline" type="button" onClick={() => user ? setWorkspace("profile") : setAuthMode("register")}>{user ? "Edit your profile" : "Create your profile"} <span aria-hidden="true">↗</span></button>
           </div>
           <div className="directory-layout">
             <ResearcherFilters filters={filters} onChange={updateFilter} onReset={() => setFilters(initialFilters)} />
@@ -145,7 +162,7 @@ function Home() {
         </section>
 
         <section id="projects" className="projects-section" aria-labelledby="projects-title">
-          <div className="section-heading"><div><h2 id="projects-title">Research in motion</h2><p>Explore projects and see where your expertise could help.</p></div><a className="button button-quiet" href="#discover">Explore all projects <span aria-hidden="true">→</span></a></div>
+          <div className="section-heading"><div><h2 id="projects-title">Research in motion</h2><p>Explore projects and see where your expertise could help.</p></div>{user ? <button className="button button-primary" type="button" onClick={() => setWorkspace("project")}>＋ Share a project</button> : <a className="button button-quiet" href="#discover">Explore all projects <span aria-hidden="true">→</span></a>}</div>
           <div className="researcher-grid">{displayedProjects.map((project) => <ProjectCard key={project.id} project={project} onRecommend={openRecommendations} />)}</div>
         </section>
       </main>
@@ -168,6 +185,9 @@ function Home() {
           {recommendationResults.length > 0 && <ul className="recommendation-list">{recommendationResults.map(({ researcher, score, reason }) => <li key={researcher._id}><div className="recommendation-result-head"><strong>{researcher.name}</strong><span>{score}% fit</span></div><small>{researcher.department || "Independent researcher"}</small><p>{reason}</p></li>)}</ul>}
         </section>
       </div>}
+      {authMode && <AuthDialog mode={authMode} onClose={() => setAuthMode("")} onAuthenticated={(nextUser) => { setUser(nextUser); setNotice(`Welcome, ${nextUser.name}. Your workspace is ready.`); }} />}
+      {workspace && user && <WorkspaceDialog user={user} initialTab={workspace} onClose={() => setWorkspace("")} onUserUpdated={setUser} onNotice={setNotice} onProjectCreated={(project) => { setLiveProjects((current) => [{ id: project._id, title: project.title, summary: project.summary, status: project.status === "seeking-collaborators" ? "Seeking collaborators" : project.status, year: project.startDate ? new Date(project.startDate).getFullYear() : "Ongoing", lead: user.name, areas: project.researchAreas || [] }, ...(current || [])]); }} />}
+      {connectResearcher && <ConnectDialog researcher={connectResearcher} projects={liveProjects || []} onClose={() => setConnectResearcher(null)} onNotice={setNotice} />}
     </div>
   );
 }
