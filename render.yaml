@@ -5,11 +5,13 @@ services:
     rootDir: backend
     buildCommand: npm install
     startCommand: npm start
-    healthCheckPath: /api/health
+    healthCheckPath: /api/ready
     maxShutdownDelaySeconds: 30
     envVars:
       - key: NODE_ENV
         value: production
+      - key: TRUST_PROXY_HOPS
+        value: "1"
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
@@ -20,3 +22,9 @@ services:
         value: 1d
       - key: MAX_UPLOAD_BYTES
         value: 5242880
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+    disk:
+      name: research-connect-uploads
+      mountPath: /var/data
+      sizeGB: 1

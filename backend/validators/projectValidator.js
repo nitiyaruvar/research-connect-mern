@@ -17,6 +17,16 @@ function cleanStringList(value, field, maxItems = 12) {
   return [...new Set(value.map((item) => cleanString(item, field, { required: true, max: 60 })))];
 }
 
+function cleanAttachments(value) {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.length > 8) throw new Error("Attachments must contain at most 8 uploaded files");
+  const urls = [...new Set(value)];
+  if (urls.some((url) => typeof url !== "string" || !/^\/uploads\/[a-f\d-]{36}\.(?:png|jpg|webp|pdf)$/i.test(url))) {
+    throw new Error("Attachments must be files uploaded to this account");
+  }
+  return urls;
+}
+
 function validateProjectInput(request, response, next) {
   try {
     const body = request.body || {};
@@ -27,6 +37,7 @@ function validateProjectInput(request, response, next) {
       department: cleanString(body.department, "Department", { max: 120 }),
       researchAreas: cleanStringList(body.researchAreas, "Research areas"),
       keywords: cleanStringList(body.keywords, "Keywords"),
+      attachments: cleanAttachments(body.attachments),
     };
     if (body.status !== undefined) {
       if (!ALLOWED_STATUSES.has(body.status)) throw new Error("Status is not supported");
@@ -60,6 +71,7 @@ function validateProjectUpdate(request, response, next) {
     for (const [field, label] of [["researchAreas", "Research areas"], ["keywords", "Keywords"]]) {
       if (Object.hasOwn(body, field)) input[field] = cleanStringList(body[field], label);
     }
+    if (Object.hasOwn(body, "attachments")) input.attachments = cleanAttachments(body.attachments);
     if (Object.hasOwn(body, "status")) {
       if (!ALLOWED_STATUSES.has(body.status)) throw new Error("Status is not supported");
       input.status = body.status;

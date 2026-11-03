@@ -41,6 +41,7 @@
 .researcher-card:hover { transform: translateY(-2px); box-shadow: 0 10px 28px #223b2b10; }
 .researcher-top { display: flex; gap: 13px; align-items: center; }
 .avatar { display: grid; flex: 0 0 47px; place-items: center; width: 47px; height: 47px; border-radius: 15px; background: var(--mint); color: var(--forest); font: 800 15px Manrope, sans-serif; }
+.avatar img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
 .researcher-name { margin: 0; font: 700 15px Manrope, sans-serif; }
 .researcher-role { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
 .researcher-field { margin: 17px 0 12px; font-size: 13px; font-weight: 700; }
@@ -64,7 +65,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .project-card p { min-height: 58px; margin-bottom: 15px; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .project-owner { margin-top: 15px; padding-top: 13px; border-top: 1px solid #edf0eb; color: var(--muted); font-size: 11px; }
 .project-owner strong { color: var(--ink); }
+.project-attachments { display: grid; gap: 5px; margin: 12px 0 0; padding-left: 17px; color: var(--forest); font-size: 11px; }
+.project-attachments a { color: var(--forest); }
 .project-action { margin-top: 12px; border: 0; padding: 0; color: var(--forest); background: transparent; font-size: 12px; font-weight: 700; }
+.pagination { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 18px 0 0; color: var(--muted); font-size: 12px; }
+.pagination .button { padding: 8px 12px; font-size: 11px; }
+.pagination .button:disabled { cursor: not-allowed; opacity: .5; }
 .modal-backdrop { position: fixed; z-index: 10; inset: 0; display: grid; place-items: center; overflow: auto; padding: 20px; background: #10251b99; }
 .recommendation-dialog { position: relative; width: min(560px, 100%); max-height: min(90vh, 800px); overflow: auto; border-radius: 16px; padding: 28px; background: white; box-shadow: 0 24px 80px #07130d44; }
 .recommendation-dialog .eyebrow { color: var(--forest); }
@@ -110,12 +116,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .workspace-check { display: flex !important; align-items: center; }
 .workspace-check input { width: auto; accent-color: var(--forest); }
+.attachment-fieldset { display: grid; gap: 8px; margin: 0; border: 1px solid var(--line); border-radius: 9px; padding: 12px; }
+.attachment-fieldset legend { padding: 0 4px; color: var(--muted); font-size: 11px; }
+.attachment-check { display: flex !important; align-items: center; grid-template-columns: auto minmax(0, 1fr) !important; overflow-wrap: anywhere; font-size: 11px !important; }
+.attachment-check input { width: auto; accent-color: var(--forest); }
 .request-list { display: grid; gap: 10px; max-height: 52vh; overflow: auto; padding: 12px 1px; }
 .request-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
 .request-title, .request-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .request-title { font-size: 13px; }
 .request-card p { margin: 10px 0; color: #66746b; font-size: 12px; line-height: 1.55; white-space: pre-wrap; }
 .request-card small { color: var(--muted); font-size: 11px; }
+.file-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.file-card > div { display: grid; gap: 6px; min-width: 0; }
+.file-card a { overflow-wrap: anywhere; color: var(--forest); font-size: 12px; font-weight: 700; }
+.file-card .button { flex: 0 0 auto; padding: 7px 10px; font-size: 11px; }
 .request-status { border-radius: 99px; padding: 4px 8px; background: #f1f3f0; color: #68756c; font-size: 10px; text-transform: capitalize; }
 .request-status.pending { background: #fff3d8; color: #785719; }
 .request-status.accepted { background: #e8f5e9; color: #28613f; }

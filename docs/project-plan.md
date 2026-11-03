@@ -1,6 +1,6 @@
 # Module 2 delivery plan
 
-Each numbered requirement has its own issue and pull request. Merge the pull requests in order; the frontend, schemas, endpoints, and deployment files are dependent work.
+Each numbered requirement has its own stacked pull request. The issue forms are ready for tracking work; create and link the requirement issues as access permits. Merge the pull requests in order because the frontend, schemas, endpoints, and deployment files build on earlier work.
 
 | Requirement | Pull request scope |
 | --- | --- |

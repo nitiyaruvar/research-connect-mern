@@ -7,6 +7,7 @@ import ResearcherFilters from "../components/ResearcherFilters";
 import AuthDialog from "../components/AuthDialog";
 import WorkspaceDialog from "../components/WorkspaceDialog";
 import ConnectDialog from "../components/ConnectDialog";
+import Pagination from "../components/Pagination";
 
 const demoResearchers = [
   { id: "r1", name: "Aisha Rao", role: "Associate Professor", department: "Computer Science", institution: "Northbridge University", interests: ["Artificial intelligence", "Climate science"], openToCollaboration: true },
@@ -25,7 +26,12 @@ const initialFilters = { department: "", expertise: "", openToCollaboration: fal
 function Home() {
   const [query, setQuery] = useState("");
   const [filters, setFilters] = useState(initialFilters);
-  const [notice, setNotice] = useState("");
+  const [notice, setNotice] = useState(() => {
+    const result = new URLSearchParams(window.location.search).get("oauth");
+    if (result === "failed") return "Google sign-in could not be completed.";
+    if (result === "cancelled") return "Google sign-in was cancelled.";
+    return "";
+  });
   const [liveResearchers, setLiveResearchers] = useState(null);
   const [liveProjects, setLiveProjects] = useState(null);
   const [apiUnavailable, setApiUnavailable] = useState(false);
@@ -38,21 +44,16 @@ function Home() {
   const [authMode, setAuthMode] = useState("");
   const [workspace, setWorkspace] = useState("");
   const [connectResearcher, setConnectResearcher] = useState(null);
+  const [researchPage, setResearchPage] = useState(1);
+  const [researchPages, setResearchPages] = useState(1);
+  const [projectPage, setProjectPage] = useState(1);
+  const [projectPages, setProjectPages] = useState(1);
 
   useEffect(() => {
     const url = new URL(window.location.href);
-    const oauthResult = url.searchParams.get("oauth");
-    if (oauthResult) { url.searchParams.delete("oauth"); window.history.replaceState({}, "", url); }
-    const hasToken = Boolean(window.localStorage.getItem("research-connect-token"));
-    if (!hasToken && oauthResult !== "success") {
-      if (oauthResult === "failed" || oauthResult === "cancelled") setNotice(oauthResult === "failed" ? "Google sign-in could not be completed." : "Google sign-in was cancelled.");
-      return;
-    }
+    if (url.searchParams.has("oauth")) { url.searchParams.delete("oauth"); window.history.replaceState({}, "", url); }
     let active = true;
-    apiRequest("/auth/me").then((result) => { if (active) setUser(result.data); }).catch(() => {
-      window.localStorage.removeItem("research-connect-token");
-      if (active) setNotice("Your session expired. Sign in again to continue.");
-    });
+    apiRequest("/auth/me").then((result) => { if (active) setUser(result.data); }).catch(() => {});
     return () => { active = false; };
   }, []);
   const researchers = useMemo(() => {
@@ -71,8 +72,8 @@ function Home() {
     const timer = window.setTimeout(async () => {
       try {
         const [researcherResponse, projectResponse] = await Promise.all([
-          getResearchers({ search: query.trim(), ...filters }, controller.signal),
-          getProjects(controller.signal),
+          getResearchers({ search: query.trim(), ...filters }, controller.signal, researchPage),
+          getProjects(controller.signal, projectPage),
         ]);
         setLiveResearchers((researcherResponse.data || []).map((researcher) => ({
           id: researcher._id,
@@ -80,9 +81,13 @@ function Home() {
           role: researcher.role,
           department: researcher.department || "Independent researcher",
           institution: researcher.institution || "Institution not listed",
+          profilePicture: researcher.profilePicture || "",
           interests: [...(researcher.researchInterests || []), ...(researcher.skills || [])].slice(0, 4),
           openToCollaboration: researcher.isOpenToCollaboration,
         })));
+        const nextResearchPages = Math.max(1, researcherResponse.pagination?.pages || 1);
+        setResearchPages(nextResearchPages);
+        if (researchPage > nextResearchPages) setResearchPage(nextResearchPages);
         setLiveProjects((projectResponse.data || []).map((project) => ({
           id: project._id,
           title: project.title,
@@ -90,8 +95,13 @@ function Home() {
           status: project.status === "seeking-collaborators" ? "Seeking collaborators" : project.status,
           year: project.startDate ? new Date(project.startDate).getFullYear() : "Ongoing",
           lead: project.owner?.name || "Research team",
+          ownerId: project.owner?._id,
           areas: project.researchAreas || [],
+          attachments: project.attachments || [],
         })));
+        const nextProjectPages = Math.max(1, projectResponse.pagination?.pages || 1);
+        setProjectPages(nextProjectPages);
+        if (projectPage > nextProjectPages) setProjectPage(nextProjectPages);
         setApiUnavailable(false);
       } catch (error) {
         if (error.name !== "AbortError") setApiUnavailable(true);
@@ -101,21 +111,24 @@ function Home() {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [filters, query]);
+  }, [filters, query, researchPage, projectPage]);
 
   const displayedResearchers = liveResearchers ?? researchers;
   const displayedProjects = liveProjects ?? demoProjects;
 
   function updateFilter(key, value) {
+    setResearchPage(1);
     setFilters((current) => ({ ...current, [key]: value }));
   }
 
   function showConnectNotice(researcher) {
     if (!user) { setAuthMode("login"); setNotice("Sign in to send a collaboration request."); return; }
+    if (!/^[a-f\d]{24}$/i.test(researcher.id)) { setNotice("Sample profiles are for preview only. Connect to a live researcher profile when the API is available."); return; }
     setConnectResearcher(researcher);
   }
 
   function openRecommendations(project) {
+    if (!user) { setNotice("Sign in to request collaborator matches."); setAuthMode("login"); return; }
     setRecommendationProject(project);
     setRecommendationResults([]);
     setRecommendationStatus("");
@@ -149,7 +162,7 @@ function Home() {
           <h1 id="hero-title">Great research starts with a connection.</h1>
           <p>Find people working on the questions that matter to you. Share what you are building. Make your next collaboration happen.</p>
           <form className="hero-search" role="search" onSubmit={(event) => event.preventDefault()}>
-            <input aria-label="Search researchers and topics" placeholder="Try a topic, name, or department" value={query} onChange={(event) => setQuery(event.target.value)} />
+            <input aria-label="Search researchers and topics" placeholder="Try a topic, name, or department" value={query} onChange={(event) => { setResearchPage(1); setQuery(event.target.value); }} />
             <button className="search-button" type="submit">Find researchers <span aria-hidden="true">→</span></button>
           </form>
         </section>
@@ -160,9 +173,10 @@ function Home() {
             <button className="button button-outline" type="button" onClick={() => user ? setWorkspace("profile") : setAuthMode("register")}>{user ? "Edit your profile" : "Create your profile"} <span aria-hidden="true">↗</span></button>
           </div>
           <div className="directory-layout">
-            <ResearcherFilters filters={filters} onChange={updateFilter} onReset={() => setFilters(initialFilters)} />
+            <ResearcherFilters filters={filters} onChange={updateFilter} onReset={() => { setResearchPage(1); setFilters(initialFilters); }} />
             <div>
               {displayedResearchers.length ? <div className="researcher-grid">{displayedResearchers.map((researcher) => <ResearcherCard key={researcher.id} researcher={researcher} onConnect={showConnectNotice} />)}</div> : <div className="empty-state"><strong>No researchers found</strong>Try a different search or clear the filters.</div>}
+              {!apiUnavailable && <Pagination label="Researchers" page={researchPage} pages={researchPages} onChange={setResearchPage} />}
               {apiUnavailable && <p className="demo-note">API unavailable — showing sample profiles. Start the backend or check the VITE_API_URL setting.</p>}
             </div>
           </div>
@@ -170,7 +184,8 @@ function Home() {
 
         <section id="projects" className="projects-section" aria-labelledby="projects-title">
           <div className="section-heading"><div><h2 id="projects-title">Research in motion</h2><p>Explore projects and see where your expertise could help.</p></div>{user ? <button className="button button-primary" type="button" onClick={() => setWorkspace("project")}>＋ Share a project</button> : <a className="button button-quiet" href="#discover">Explore all projects <span aria-hidden="true">→</span></a>}</div>
-          <div className="researcher-grid">{displayedProjects.map((project) => <ProjectCard key={project.id} project={project} onRecommend={openRecommendations} />)}</div>
+          {displayedProjects.length ? <div className="researcher-grid">{displayedProjects.map((project) => <ProjectCard key={project.id} project={project} onRecommend={openRecommendations} />)}</div> : <div className="empty-state"><strong>No projects yet</strong>Be the first to share a research project.</div>}
+          {!apiUnavailable && <Pagination label="Projects" page={projectPage} pages={projectPages} onChange={setProjectPage} />}
         </section>
       </main>
       <footer id="about" className="site-footer"><span>© 2025 Research Connect · Built for curious minds.</span><span>Discover · Share · Collaborate</span></footer>
@@ -193,8 +208,8 @@ function Home() {
         </section>
       </div>}
       {authMode && <AuthDialog mode={authMode} onClose={() => setAuthMode("")} onAuthenticated={(nextUser) => { setUser(nextUser); setNotice(`Welcome, ${nextUser.name}. Your workspace is ready.`); }} />}
-      {workspace && user && <WorkspaceDialog user={user} initialTab={workspace} onClose={() => setWorkspace("")} onUserUpdated={setUser} onNotice={setNotice} onProjectCreated={(project) => { setLiveProjects((current) => { const normalized = { id: project._id, title: project.title, summary: project.summary, status: project.status === "seeking-collaborators" ? "Seeking collaborators" : project.status, year: project.startDate ? new Date(project.startDate).getFullYear() : "Ongoing", lead: user.name, areas: project.researchAreas || [] }; return [normalized, ...(current || []).filter((item) => item.id !== project._id)]; }); }} onProjectDeleted={(projectId) => setLiveProjects((current) => (current || []).filter((item) => item.id !== projectId))} />}
-      {connectResearcher && <ConnectDialog researcher={connectResearcher} projects={liveProjects || []} onClose={() => setConnectResearcher(null)} onNotice={setNotice} />}
+      {workspace && user && <WorkspaceDialog user={user} initialTab={workspace} onClose={() => setWorkspace("")} onUserUpdated={setUser} onSignedOut={() => setUser(null)} onNotice={setNotice} onProjectCreated={(project) => { setLiveProjects((current) => { const normalized = { id: project._id, title: project.title, summary: project.summary, status: project.status === "seeking-collaborators" ? "Seeking collaborators" : project.status, year: project.startDate ? new Date(project.startDate).getFullYear() : "Ongoing", lead: user.name, ownerId: user._id, areas: project.researchAreas || [], attachments: project.attachments || [] }; return [normalized, ...(current || []).filter((item) => item.id !== project._id)]; }); }} onProjectDeleted={(projectId) => setLiveProjects((current) => (current || []).filter((item) => item.id !== projectId))} />}
+      {connectResearcher && <ConnectDialog researcher={connectResearcher} projects={(liveProjects || []).filter((project) => project.ownerId === connectResearcher.id)} onClose={() => setConnectResearcher(null)} onNotice={setNotice} />}
     </div>
   );
 }

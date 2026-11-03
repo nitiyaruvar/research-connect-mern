@@ -7,3 +7,8 @@ export function apiUrl(path) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return `${API_BASE_URL}${normalizedPath}`;
 }
+
+export function assetUrl(path) {
+  const origin = API_BASE_URL.replace(/\/api\/?$/, "");
+  return `${origin}${path.startsWith("/") ? path : `/${path}`}`;
+}

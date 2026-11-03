@@ -9,4 +9,9 @@ function createAccessToken(user) {
   );
 }
 
-module.exports = { createAccessToken };
+function getAccessTokenMaxAge(token) {
+  const expiration = jwt.decode(token)?.exp;
+  return Number.isInteger(expiration) ? Math.max(0, expiration - Math.floor(Date.now() / 1000)) : 0;
+}
+
+module.exports = { createAccessToken, getAccessTokenMaxAge };

@@ -1,3 +1,5 @@
+import { assetUrl } from "../api/config";
+
 function ResearcherCard({ researcher, onConnect }) {
   const initials = researcher.name
     .split(/\s+/)
@@ -9,7 +11,7 @@ function ResearcherCard({ researcher, onConnect }) {
   return (
     <article className="researcher-card">
       <div className="researcher-top">
-        <div className="avatar" aria-hidden="true">{initials}</div>
+        <div className="avatar" aria-hidden="true">{researcher.profilePicture ? <img src={researcher.profilePicture.startsWith("https:") ? researcher.profilePicture : assetUrl(researcher.profilePicture)} alt="" /> : initials}</div>
         <div>
           <h3 className="researcher-name">{researcher.name}</h3>
           <p className="researcher-role">{researcher.role}</p>

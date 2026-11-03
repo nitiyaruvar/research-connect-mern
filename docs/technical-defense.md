@@ -6,12 +6,12 @@ Research Connect is a MERN application for discovering researchers, sharing rese
 
 ## Architecture
 
-- `frontend/` contains the Vite application, reusable researcher/project components, API client, search filters, and optional AI match consent flow.
+- `frontend/` contains the Vite application, reusable researcher/project components, paginated discovery, profile and project management, collaboration inbox, API client, and optional AI match consent flow.
 - `backend/` contains Express routes, request validators, controllers, Mongoose models, repositories, authentication middleware, and file storage services.
 - `bruno/` contains runnable API request examples. Set the local Bruno environment before calling protected endpoints.
 - `docker-compose.yml` runs MongoDB, the API, and the Nginx-served frontend for a local container setup.
 
-The API keeps database access on the server. The browser never receives the MongoDB connection string or OpenAI API key. `GET /api/health` is the service health check.
+The API keeps database access on the server. The browser never receives the MongoDB connection string or OpenAI API key. `GET /api/health` checks process liveness; `GET /api/ready` checks MongoDB readiness and returns 503 when it is disconnected.
 
 ## Data model and relationships
 
@@ -24,10 +24,10 @@ MongoDB references suit the independently queried researcher, project, and reque
 
 ## API and security decisions
 
-- Registration and login accept username/email identity and password. Passwords are stored as bcrypt hashes.
+- Registration and login accept username/email identity and password. Passwords are stored as bcrypt hashes. Browser sessions use an HttpOnly cookie (SameSite=Lax locally and SameSite=None; Secure in production); the frontend requests cookie-only responses, while Bearer tokens remain available to Bruno and other API clients.
 - JWT middleware protects write operations and account endpoints. Resource controllers check ownership; the admin role middleware handles administrator-only operations.
 - Google OAuth is optional and uses a state check. Set the provider credentials and callback URL before enabling it.
-- Request validators constrain input before controller/database operations. Public researcher/project queries avoid returning password hashes and private account details.
+- Request validators constrain input before controller/database operations. Public researcher/project queries avoid returning password hashes and private account details. Login, registration, and OAuth starts have per-IP rate limits; mutating browser requests must match a configured origin.
 - Uploads are authenticated, size-limited, checked against allowed MIME types and file signatures, and stored under generated names. Uploaded files use public URLs; do not use this storage mode for confidential research material.
 - AI matching is optional. Without consent, matching uses local research-term overlap. If consent is selected and `AI_API_KEY` is configured, a minimal set of project and candidate research fields is sent to OpenAI; names, emails, and account IDs are excluded. Suggestions are advisory.
 
@@ -50,7 +50,7 @@ To enable Google OAuth, configure `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `G
 
 ## Verification and limitations
 
-Jest/Supertest API tests are included and run with `npm test` from `backend/`. They were not executed in the authoring environment because npm was unavailable. The Docker configuration and cloud deployment have not been run against user-owned services. Render, Vercel, MongoDB, Google OAuth, and OpenAI credentials/service accounts must be supplied by the project owner. The GitHub issue forms and PR template are included; the connected GitHub integration denied issue creation, so no starter issues were created.
+Jest/Supertest tests cover health/readiness, security headers, origin checks, rate limiting, validation, query helpers, recommendations, and authentication boundaries. Five MongoDB integration tests exercise registration/login, project ownership, collaboration status, and upload attachment/deletion when `MONGODB_URI` points to an isolated test database; GitHub Actions supplies a disposable MongoDB service. The frontend is linted and built in GitHub Actions. The Docker configuration and cloud deployment still need a run against owner-controlled services. Render, Vercel, MongoDB, Google OAuth, and OpenAI credentials/service accounts must be supplied by the project owner. GitHub issue forms and the PR template are included; matching requirement issues remain to be created because the connected GitHub integration denied issue creation.
 
 ## Questions to prepare for
 

@@ -4,7 +4,7 @@ const path = require("node:path");
 const Project = require("../models/Project");
 const UploadedFile = require("../models/UploadedFile");
 const User = require("../models/User");
-const { isValidId } = require("../utils/query");
+const { isValidId, paginationFrom } = require("../utils/query");
 
 const fileTypes = {
   "image/png": { extension: ".png", signature: (data) => data.subarray(0, 8).equals(Buffer.from("89504e470d0a1a0a", "hex")) },
@@ -19,6 +19,16 @@ function getUploadDirectory() {
 
 function safeOriginalName(name) {
   return path.basename(String(name || "file")).replace(/[\r\n\0]/g, "").slice(0, 120) || "file";
+}
+
+async function listUploads(request, response) {
+  const { page, limit, skip } = paginationFrom(request.query);
+  const filter = { owner: request.user.id };
+  const [files, total] = await Promise.all([
+    UploadedFile.find(filter).select("originalName mimeType size url createdAt").sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    UploadedFile.countDocuments(filter),
+  ]);
+  response.json({ data: files, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
 }
 
 async function createUpload(request, response) {
@@ -73,4 +83,4 @@ async function deleteUpload(request, response) {
   response.status(204).end();
 }
 
-module.exports = { createUpload, deleteUpload };
+module.exports = { createUpload, deleteUpload, listUploads };

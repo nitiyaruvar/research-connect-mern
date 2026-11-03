@@ -12,8 +12,7 @@ function AuthDialog({ mode: initialMode = "login", onClose, onAuthenticated }) {
     setBusy(true); setError("");
     const values = Object.fromEntries(new FormData(event.currentTarget));
     try {
-      const result = await apiRequest(`/auth/${mode === "register" ? "register" : "login"}`, { method: "POST", body: values });
-      window.localStorage.setItem("research-connect-token", result.data.token);
+      const result = await apiRequest(`/auth/${mode === "register" ? "register" : "login"}?session=cookie`, { method: "POST", body: values });
       onAuthenticated(result.data.user);
       onClose();
     } catch (requestError) { setError(requestError.message); }
