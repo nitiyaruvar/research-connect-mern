@@ -1,6 +1,15 @@
 const Project = require("../models/Project");
 const CollaborationRequest = require("../models/CollaborationRequest");
+const UploadedFile = require("../models/UploadedFile");
 const { escapeRegex, isValidId, paginationFrom } = require("../utils/query");
+
+async function ensureOwnedAttachments(attachments, ownerId, response) {
+  if (!attachments?.length) return true;
+  const count = await UploadedFile.countDocuments({ owner: ownerId, url: { $in: attachments } });
+  if (count === attachments.length) return true;
+  response.status(400).json({ message: "Each attachment must be an uploaded file owned by your account" });
+  return false;
+}
 
 async function listProjects(request, response) {
   const { page, limit, skip } = paginationFrom(request.query);
@@ -24,7 +33,7 @@ async function listProjects(request, response) {
 
   const [projects, total] = await Promise.all([
     Project.find(filter)
-      .select("title summary status department researchAreas keywords owner collaborators startDate endDate createdAt updatedAt")
+      .select("title summary status department researchAreas keywords attachments owner collaborators startDate endDate createdAt updatedAt")
       .populate("owner", "name username department institution profilePicture")
       .sort({ createdAt: -1, _id: -1 })
       .skip(skip)
@@ -47,12 +56,14 @@ async function getProject(request, response) {
 }
 
 async function createProject(request, response) {
+  if (!await ensureOwnedAttachments(request.validatedBody.attachments, request.user.id, response)) return;
   const project = await Project.create({ ...request.validatedBody, owner: request.user.id });
   await project.populate("owner", "name username department institution profilePicture");
   response.status(201).json({ data: project });
 }
 
 async function updateProject(request, response) {
+  if (!await ensureOwnedAttachments(request.validatedBody.attachments, request.user.id, response)) return;
   const nextStart = Object.hasOwn(request.validatedBody, "startDate") ? request.validatedBody.startDate : request.project.startDate;
   const nextEnd = Object.hasOwn(request.validatedBody, "endDate") ? request.validatedBody.endDate : request.project.endDate;
   if (nextStart && nextEnd && nextEnd < nextStart) {

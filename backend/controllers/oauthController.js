@@ -1,6 +1,6 @@
 const crypto = require("node:crypto");
 const User = require("../models/User");
-const { createAccessToken } = require("../services/tokenService");
+const { createAccessToken, getAccessTokenMaxAge } = require("../services/tokenService");
 const { getCookie, serializeCookie } = require("../utils/cookies");
 
 const STATE_COOKIE = "research_connect_oauth_state";
@@ -81,7 +81,8 @@ async function googleCallback(request, response) {
       });
     }
 
-    response.append("Set-Cookie", serializeCookie(ACCESS_COOKIE, createAccessToken(user), { maxAge: 86400 }));
+    const accessToken = createAccessToken(user);
+    response.append("Set-Cookie", serializeCookie(ACCESS_COOKIE, accessToken, { maxAge: getAccessTokenMaxAge(accessToken) }));
     return response.redirect(`${getClientOrigin()}/?oauth=success`);
   } catch (_error) {
     return response.redirect(`${getClientOrigin()}/?oauth=failed`);

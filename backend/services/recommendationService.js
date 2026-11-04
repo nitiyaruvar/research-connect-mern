@@ -1,4 +1,4 @@
-const STOP_WORDS = new Set(["the", "and", "for", "with", "from", "into", "this", "that", "research", "project", "study"]);
+const STOP_WORDS = new Set(["the", "and", "for", "with", "from", "into", "this", "that", "research", "project", "study", "science", "scientist", "researcher"]);
 
 function termsFrom(values) {
   return new Set(values

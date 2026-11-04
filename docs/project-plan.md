@@ -1,6 +1,6 @@
 # Module 2 delivery plan
 
-Each numbered requirement has its own issue and pull request. Merge the pull requests in order; the frontend, schemas, endpoints, and deployment files are dependent work.
+Each numbered requirement has its own stacked pull request. The issue forms are ready for tracking work; create and link the requirement issues as access permits. Merge the pull requests in order because the frontend, schemas, endpoints, and deployment files build on earlier work.
 
 | Requirement | Pull request scope |
 | --- | --- |
@@ -25,6 +25,10 @@ Each numbered requirement has its own issue and pull request. Merge the pull req
 | 2.19 | Dockerfiles and Compose environment |
 | 2.20 | Optional AI recommendations with fallback |
 | 2.21 | Submission, demo, and technical defense documentation |
+
+## Current completion and external dependencies
+
+The repository code for requirements 2.1–2.21 is present in the stacked pull requests. The requirements are not all operationally complete until their external steps are done: create the 21 matching GitHub issues (the GitHub integration denied issue writes during this work), configure and launch Render/Vercel/MongoDB, supply optional Google OAuth and AI credentials, run the Docker stack, and review CI results for the current head commit. Deployment configuration is not the same as a live deployment. See the status table in the root README for the current breakdown.
 
 ## Review checklist
 

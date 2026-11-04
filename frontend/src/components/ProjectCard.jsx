@@ -1,3 +1,5 @@
+import { assetUrl } from "../api/config";
+
 function ProjectCard({ project, onRecommend }) {
   return (
     <article className="project-card">
@@ -6,6 +8,7 @@ function ProjectCard({ project, onRecommend }) {
       <p>{project.summary}</p>
       <div className="tag-list">{project.areas.map((area) => <span className="tag" key={area}>{area}</span>)}</div>
       <div className="project-owner">Led by <strong>{project.lead}</strong></div>
+      {project.attachments?.length > 0 && <ul className="project-attachments" aria-label="Project files">{project.attachments.map((file) => <li key={file}><a href={assetUrl(file)} target="_blank" rel="noreferrer">Project file <span aria-hidden="true">↗</span></a></li>)}</ul>}
       {onRecommend && /^[a-f\d]{24}$/i.test(project.id) && <button className="project-action" type="button" onClick={() => onRecommend(project)}>Find collaborators <span aria-hidden="true">↗</span></button>}
     </article>
   );

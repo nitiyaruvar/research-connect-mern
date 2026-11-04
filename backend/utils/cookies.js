@@ -10,7 +10,8 @@ function getCookie(header = "", name) {
 }
 
 function serializeCookie(name, value, { maxAge, path = "/", httpOnly = true } = {}) {
-  const parts = [`${name}=${encodeURIComponent(value)}`, `Path=${path}`, "SameSite=Lax"];
+  const sameSite = process.env.NODE_ENV === "production" ? "None" : "Lax";
+  const parts = [`${name}=${encodeURIComponent(value)}`, `Path=${path}`, `SameSite=${sameSite}`];
   if (httpOnly) parts.push("HttpOnly");
   if (maxAge !== undefined) parts.push(`Max-Age=${maxAge}`);
   if (process.env.NODE_ENV === "production") parts.push("Secure");
