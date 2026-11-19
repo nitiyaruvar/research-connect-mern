@@ -1,9 +1,9 @@
 function ResearcherCard({ name, field }) {
   return (
-    <div>
+    <article className="researcher-card">
       <h3>{name}</h3>
       <p>{field}</p>
-    </div>
+    </article>
   );
 }
 

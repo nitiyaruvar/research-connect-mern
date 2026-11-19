@@ -1,20 +1,22 @@
 import Navbar from "../components/Navbar";
 import ResearcherCard from "../components/ResearcherCard";
 
-function Home() {
+function Home({ user, onLogout }) {
   return (
     <>
-      <Navbar />
+      <Navbar user={user} onLogout={onLogout} />
 
-      <ResearcherCard
-        name="Dr. John"
-        field="Artificial Intelligence"
-      />
+      <main className="home-page">
+        <p className="eyebrow">RESEARCH CONNECT</p>
+        <h1>Good to see you, {user.name}.</h1>
+        <p className="home-copy">Explore researchers working across disciplines and find your next collaboration.</p>
 
-      <ResearcherCard
-        name="Dr. Sarah"
-        field="Data Science"
-      />
+        <div className="researcher-grid">
+          <ResearcherCard name="Dr. John" field="Artificial Intelligence" />
+          <ResearcherCard name="Dr. Sarah" field="Data Science" />
+        </div>
+      </main>
+
     </>
   );
 }

@@ -1,3 +1,14 @@
+## JWT authentication
+
+Set `MONGO_URI` and `JWT_SECRET` in the backend environment before starting the API.
+
+`POST /api/auth/register` and `POST /api/auth/login` return a JWT. Send it on protected requests with:
+
+```text
+Authorization: Bearer <token>
+```
+
+The `/api/auth/me`, `/api/users`, `/api/projects`, and `/api/collaboration-requests` endpoints require a valid, non-expired token. Project creation uses the authenticated user as its owner, and project changes are limited to that owner. Collaboration requests use the authenticated user as sender, and updates are limited to their sender or recipient.
 # Research Networking Platform
 
 ## Overview
@@ -114,6 +125,30 @@ By making institutional research more visible and accessible, the platform promo
 ### Additional Tools
 - Git & GitHub
 - REST APIs
+
+## Backend setup
+
+1. Install dependencies in `backend` with `npm install`.
+2. Copy `backend/.env.example` to `backend/.env` and set `MONGO_URI` and a private `JWT_SECRET`.
+3. Start the API with `npm start` or `npm run dev`.
+
+### Username and password authentication
+
+The API exposes:
+
+- `POST /api/auth/register` with `username`, `name`, `email`, and `password`.
+- `POST /api/auth/login` with `username` and `password`.
+- `GET /api/auth/me` with an `Authorization: Bearer <token>` header.
+
+Passwords are hashed with bcrypt before storage. Successful registration and login return a one-day JWT and a public user profile; the password is never returned.
+
+To verify JWT authorization manually:
+
+1. Register or sign in and copy the `token` from the response.
+2. Request `GET /api/auth/me` with `Authorization: Bearer <token>`; a valid token returns the authenticated user.
+3. Repeat the request without the header, or with an invalid/expired token; the API returns `401 Unauthorized`.
+
+The backend models users, research projects, and collaboration requests. References connect project owners and collaborators, while each collaboration request stores its sender, recipient, optional project, message, and status.
 
 ---
 
