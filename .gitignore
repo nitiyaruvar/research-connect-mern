@@ -1,9 +1,5 @@
 node_modules/
-.env
-.env.*
-!.env.example
-uploads/
-coverage/
 dist/
-.DS_Store
-Thumbs.db
+.env
+.env.local
+.env.*.local
